@@ -14,35 +14,35 @@ class ProductCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       clipBehavior: Clip.antiAlias,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Inside the Expanded part of ProductCard build method:
           Expanded(
-            child: Image.network(
-              product.imageUrl,
-              fit: BoxFit.cover,
+            child: Container(
               width: double.infinity,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 50),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                image: DecorationImage(
+                  image: NetworkImage(product.imageUrl),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('\$${product.price.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onAdd,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-                    child: const Text('Add to Cart'),
-                  ),
+                Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('Rs. ${product.price.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green)),
+                const SizedBox(height: 5),
+                ElevatedButton(
+                  onPressed: onAdd,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                  child: const Text('Add to Cart'),
                 )
               ],
             ),
-          ),
+          )
         ],
       ),
     );

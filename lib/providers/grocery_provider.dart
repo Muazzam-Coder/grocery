@@ -25,6 +25,8 @@ class GroceryProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // --- CART LOGIC ---
+
   void addToCart(Product product) {
     int index = _cart.indexWhere((item) => item.product.id == product.id);
     if (index >= 0) {
@@ -32,6 +34,29 @@ class GroceryProvider with ChangeNotifier {
     } else {
       _cart.add(CartItem(product: product));
     }
+    _saveCart();
+    notifyListeners();
+  }
+
+  void updateQuantity(String productId, bool isIncrement) {
+    int index = _cart.indexWhere((item) => item.product.id == productId);
+    if (index >= 0) {
+      if (isIncrement) {
+        _cart[index].quantity++;
+      } else {
+        if (_cart[index].quantity > 1) {
+          _cart[index].quantity--;
+        } else {
+          _cart.removeAt(index); // Remove if quantity reaches 0
+        }
+      }
+      _saveCart();
+      notifyListeners();
+    }
+  }
+
+  void removeFromCart(String productId) {
+    _cart.removeWhere((item) => item.product.id == productId);
     _saveCart();
     notifyListeners();
   }
@@ -53,7 +78,8 @@ class GroceryProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Persistence
+  // --- PERSISTENCE ---
+
   Future<void> _saveCart() async => StorageService.saveData('cart', _cart.map((e) => e.toJson()).toList());
   Future<void> _saveHistory() async => StorageService.saveData('history', _history.map((e) => e.toJson()).toList());
 
@@ -61,10 +87,10 @@ class GroceryProvider with ChangeNotifier {
     final cartData = await StorageService.loadData('cart');
     if (cartData != null) {
       final List decoded = jsonDecode(cartData);
-      _cart = decoded.map((item) => CartItem(
-        product: DummyData.products.firstWhere((p) => p.id == item['id']),
-        quantity: item['qty']
-      )).toList();
+      _cart = decoded.map((item) {
+        final product = DummyData.products.firstWhere((p) => p.id == item['id']);
+        return CartItem(product: product, quantity: item['qty']);
+      }).toList();
     }
     
     final historyData = await StorageService.loadData('history');
