@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/grocery_provider.dart';
+import '../widgets/receipt_popup.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -118,9 +119,33 @@ class CartScreen extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {
                           provider.checkout();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Order placed successfully!'))
-                          );
+                          final order = provider.history.isNotEmpty ? provider.history.first : null;
+                          if (order != null) {
+                            showGeneralDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              barrierLabel: 'Receipt',
+                              barrierColor: Colors.black26,
+                              transitionDuration: const Duration(milliseconds: 360),
+                              pageBuilder: (context, a1, a2) {
+                                return ReceiptPopup(order: order);
+                              },
+                              transitionBuilder: (context, animation, secondaryAnimation, child) {
+                                final curved = Curves.easeOut.transform(animation.value);
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: SlideTransition(
+                                    position: Tween(begin: const Offset(0, -0.06), end: Offset.zero).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+                                    child: ScaleTransition(scale: Tween(begin: 0.98, end: 1.0).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)), child: child),
+                                  ),
+                                );
+                              },
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Order placed successfully!'))
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green, 
